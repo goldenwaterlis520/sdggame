@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>环保社区保卫棋</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #e8f5e9;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .game-title {
+            color: #2e7d32;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .board-container {
+            width: 100%;
+        }
+        
+        .controls-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .board {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 5px;
+            background-color: #c8e6c9;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .cell {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            padding: 5px;
+            text-align: center;
+            font-size: 16px;
+            position: relative;
+            color: #333;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .cell-number {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 10px;
+            background-color: rgba(255,255,255,0.7);
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cell.start {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        .cell.end {
+            background-color: #ff9800;
+            color: white;
+        }
+        
+        .cell.positive {
+            background-color: #c8e6c9;
+        }
+        
+        .cell.negative {
+            background-color: #ffcdd2;
+        }
+        
+        .cell.special {
+            background-color: #bbdefb;
+        }
+        
+        .player {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .player-1 {
+            background-color: #f44336;
+            left: 2px;
+        }
+        
+        .player-2 {
+            background-color: #2196f3;
+            left: 30px;
+        }
+        
+        .player-3 {
+            background-color: #ffeb3b;
+            left: 58px;
+            color: #333;
+        }
+        
+        .dice-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .dice {
+            width: 70px;
+            height: 70px;
+            background-color: white;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.3s;
+            padding: 5px;
+        }
+        
+        .dice:hover {
+            transform: scale(1.05);
+        }
+        
+        .dice-value {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            gap: 4px;
+        }
+        
+        .dot {
+            width: 10px;
+            height: 10px;
+            background-color: black;
+            border-radius: 50%;
+        }
+        
+        .controls {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .player-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .player-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        
+        .player-status.active {
+            background-color: #e3f2fd;
+        }
+        
+        .player-color {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .player-color-1 {
+            background-color: #f44336;
+        }
+        
+        .player-color-2 {
+            background-color: #2196f3;
+        }
+        
+        .player-color-3 {
+            background-color: #ffeb3b;
+            color: #333;
+        }
+        
+        button {
+            padding: 12px 20px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #388e3c;
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .message {
+            padding: 15px;
+            background-color: #e1f5fe;
+            border-radius: 5px;
+            text-align: center;
+            margin-top: 10px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            top: 0;
+            opacity: 0;
+        }
+        
+        @keyframes fall {
+            to {
+                top: 100vh;
+                opacity: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .game-container {
+                max-width: 100%;
+            }
+            
+            .cell {
+                font-size: 14px;
+            }
+            
+            .player {
+                width: 20px;
+                height: 20px;
+                font-size: 10px;
+            }
+            
+            .player-2 {
+                left: 25px;
+            }
+            
+            .player-3 {
+                left: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="game-title">环保社区保卫棋</h1>
+    
+    <div class="game-container">
+        <div class="board-container">
+            <div class="board" id="board">
+                <!-- 棋盘格子将通过JavaScript动态生成 -->
+            </div>
+            
+            <div class="dice-container">
+                <div class="dice" id="dice1">
+                    <div>玩家1骰子</div>
+                    <div class="dice-value" id="dice1-value"></div>
+                </div>
+                <div class="dice" id="dice2">
+                    <div>玩家2骰子</div>
+                    <div class="dice-value" id="dice2-value"></div>
+                </div>
+                <div class="dice" id="dice3">
+                    <div>玩家3骰子</div>
+                    <div class="dice-value" id="dice3-value"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls-container">
+            <div class="controls">
+                <div class="player-info">
+                    <div class="player-status" id="player1-status">
+                        <div class="player-color player-color-1">1</div>
+                        <span>玩家1</span>
+                    </div>
+                    <div class="player-status" id="player2-status">
+                        <div class="player-color player-color-2">2</div>
+                        <span>玩家2</span>
+                    </div>
+                    <div class="player-status" id="player3-status">
+                        <div class="player-color player-color-3">3</div>
+                        <span>玩家3</span>
+                    </div>
+                </div>
+                
+                <button id="roll-btn">掷骰子</button>
+                <button id="restart-btn" disabled>再玩一次</button>
+                
+                <div class="message" id="message">
+                    游戏开始！玩家1的回合
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 游戏配置
+        const BOARD_SIZE = 30;
+        const PLAYER_COUNT = 3;
+        
+        // 特殊格子类型
+        const CELL_TYPES = {
+            START: 'start',
+            END: 'end',
+            POSITIVE: 'positive', // 环保行为
+            NEGATIVE: 'negative', // 不环保行为
+            REROLL: 'reroll',     // 再抛一次
+            PAUSE: 'pause'        // 暂停一次
+        };
+        
+        // 游戏状态
+        let gameState = {
+            players: [
+                { position: 0, paused: 0, color: 'player-1' },
+                { position: 0, paused: 0, color: 'player-2' },
+                { position: 0, paused: 0, color: 'player-3' }
+            ],
+            currentPlayer: 0,
+            gameOver: false,
+            diceValues: [0, 0, 0]
+        };
+        
+        // 棋盘格子配置
+        const boardCells = [
+            { type: CELL_TYPES.START, text: '起点', color: '#4caf50' },
+            { type: CELL_TYPES.POSITIVE, text: '超市食物回收🏪', color: '#a5d6a7' },
+            { type: CELL_TYPES.POSITIVE, text: '艺术馆用太阳能🏛️✨🖼️', color: '#81c784' },
+            { type: CELL_TYPES.POSITIVE, text: '社区植树活动🌳', color: '#66bb6a' },
+            { type: CELL_TYPES.NEGATIVE, text: '乱扔垃圾🚯', color: '#ef9a9a' },
+            { type: CELL_TYPES.POSITIVE, text: '垃圾分类回收♻️', color: '#4caf50' },
+            { type: CELL_TYPES.REROLL, text: '再抛一次', color: '#bbdefb' },
+            { type: CELL_TYPES.NEGATIVE, text: '使用一次性塑料', color: '#e57373' },
+            { type: CELL_TYPES.POSITIVE, text: '骑自行车出行🚲', color: '#a5d6a7' },
+            { type: CELL_TYPES.POSITIVE, text: '节约用水💧', color: '#81c784' },
+            { type: CELL_TYPES.PAUSE, text: '暂停一次', color: '#ffcc80' },
+            { type: CELL_TYPES.NEGATIVE, text: '浪费食物🍽️', color: '#ef9a9a' },
+            { type: CELL_TYPES.POSITIVE, text: '使用环保袋🛍️', color: '#66bb6a' },
+            { type: CELL_TYPES.POSITIVE, text: '社区清洁活动🧹', color: '#4caf50' },
+            { type: CELL_TYPES.NEGATIVE, text: '开车排放尾气🚗', color: '#e57373' },
+            { type: CELL_TYPES.POSITIVE, text: '使用节能灯泡💡', color: '#a5d6a7' },
+            { type: CELL_TYPES.REROLL, text: '再抛一次', color: '#bbdefb' },
+            { type: CELL_TYPES.POSITIVE, text: '回收旧衣物👕', color: '#81c784' },
+            { type: CELL_TYPES.NEGATIVE, text: '乱扔电池🔋', color: '#ef9a9a' },
+            { type: CELL_TYPES.POSITIVE, text: '堆肥厨余垃圾🍂', color: '#66bb6a' },
+            { type: CELL_TYPES.POSITIVE, text: '使用公共交通🚌', color: '#4caf50' },
+            { type: CELL_TYPES.NEGATIVE, text: '过度使用空调❄️', color: '#e57373' },
+            { type: CELL_TYPES.POSITIVE, text: '社区花园种植🌻', color: '#a5d6a7' },
+            { type: CELL_TYPES.PAUSE, text: '暂停一次', color: '#ffcc80' },
+            { type: CELL_TYPES.POSITIVE, text: '减少纸张使用📄', color: '#81c784' },
+            { type: CELL_TYPES.NEGATIVE, text: '乱扔烟头🚬', color: '#ef9a9a' },
+            { type: CELL_TYPES.POSITIVE, text: '雨水收集系统🌧️', color: '#66bb6a' },
+            { type: CELL_TYPES.POSITIVE, text: '环保志愿者活动🙋', color: '#4caf50' },
+            { type: CELL_TYPES.NEGATIVE, text: '使用含磷洗涤剂🧴', color: '#e57373' },
+            { type: CELL_TYPES.END, text: '终点', color: '#ff9800' }
+        ];
+        
+        // 初始化游戏
+        function initGame() {
+            createBoard();
+            updatePlayerDisplay();
+            updateDiceDisplay();
+            
+            // 添加事件监听器
+            document.getElementById('roll-btn').addEventListener('click', rollDice);
+            document.getElementById('restart-btn').addEventListener('click', restartGame);
+        }
+        
+        // 创建棋盘
+        function createBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            
+            for (let i = 0; i < BOARD_SIZE; i++) {
+                const cell = document.createElement('div');
+                cell.className = `cell ${boardCells[i].type}`;
+                cell.style.backgroundColor = boardCells[i].color;
+                
+                // 添加格子编号
+                const cellNumber = document.createElement('div');
+                cellNumber.className = 'cell-number';
+                cellNumber.textContent = i + 1;
+                cell.appendChild(cellNumber);
+                
+                // 添加格子文本
+                const cellText = document.createElement('div');
+                cellText.textContent = boardCells[i].text;
+                cell.appendChild(cellText);
+                
+                // 添加玩家标记容器
+                const playersContainer = document.createElement('div');
+                playersContainer.className = 'players-container';
+                playersContainer.style.position = 'absolute';
+                playersContainer.style.bottom = '2px';
+                playersContainer.style.left = '2px';
+                playersContainer.style.width = 'calc(100% - 4px)';
+                playersContainer.style.height = '25px';
+                cell.appendChild(playersContainer);
+                
+                cell.id = `cell-${i}`;
+                board.appendChild(cell);
+            }
+            
+            // 初始放置玩家
+            updatePlayerPositions();
+        }
+        
+        // 更新玩家位置显示
+        function updatePlayerPositions() {
+            // 清除所有玩家标记
+            document.querySelectorAll('.players-container').forEach(container => {
+                container.innerHTML = '';
+            });
+            
+            // 添加玩家标记到当前位置
+            gameState.players.forEach((player, index) => {
+                const cell = document.getElementById(`cell-${player.position}`);
+                if (cell) {
+                    const playerMarker = document.createElement('div');
+                    playerMarker.className = `player ${player.color}`;
+                    playerMarker.title = `玩家${index + 1}`;
+                    playerMarker.textContent = index + 1; // 在棋子内添加数字
+                    
+                    const playersContainer = cell.querySelector('.players-container');
+                    playersContainer.appendChild(playerMarker);
+                }
+            });
+        }
+        
+        // 更新玩家状态显示
+        function updatePlayerDisplay() {
+            // 更新当前玩家高亮
+            document.querySelectorAll('.player-status').forEach((status, index) => {
+                if (index === gameState.currentPlayer) {
+                    status.classList.add('active');
+                } else {
+                    status.classList.remove('active');
+                }
+            });
+        }
+        
+        // 更新骰子显示
+        function updateDiceDisplay() {
+            for (let i = 0; i < PLAYER_COUNT; i++) {
+                const diceValueElement = document.getElementById(`dice${i+1}-value`);
+                diceValueElement.innerHTML = '';
+                
+                // 根据骰子值添加相应数量的黑点
+                const value = gameState.diceValues[i];
+                if (value > 0) {
+                    for (let j = 0; j < value; j++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'dot';
+                        diceValueElement.appendChild(dot);
+                    }
+                } else {
+                    diceValueElement.textContent = '?';
+                }
+            }
+        }
+        
+        // 掷骰子
+        function rollDice() {
+            if (gameState.gameOver) return;
+            
+            // 检查当前玩家是否被暂停
+            if (gameState.players[gameState.currentPlayer].paused > 0) {
+                gameState.players[gameState.currentPlayer].paused--;
+                showMessage(`玩家${gameState.currentPlayer + 1}被暂停，跳过本轮`);
+                nextPlayer();
+                return;
+            }
+            
+            // 掷骰子（1-4）
+            gameState.diceValues[gameState.currentPlayer] = Math.floor(Math.random() * 4) + 1;
+            
+            updateDiceDisplay();
+            
+            // 移动玩家
+            movePlayer(gameState.diceValues[gameState.currentPlayer]);
+        }
+        
+        // 移动玩家
+        function movePlayer(steps) {
+            const player = gameState.players[gameState.currentPlayer];
+            const oldPosition = player.position;
+            let newPosition = oldPosition + steps;
+            
+            // 处理到达终点的情况
+            if (newPosition >= BOARD_SIZE - 1) {
+                newPosition = BOARD_SIZE - 1;
+                player.position = newPosition;
+                updatePlayerPositions();
+                checkWin();
+                return;
+            }
+            
+            player.position = newPosition;
+            updatePlayerPositions();
+            
+            // 处理格子效果
+            const cellType = boardCells[newPosition].type;
+            handleCellEffect(cellType, newPosition);
+        }
+        
+        // 处理格子效果
+        function handleCellEffect(cellType, position) {
+            const player = gameState.players[gameState.currentPlayer];
+            let message = '';
+            
+            switch (cellType) {
+                case CELL_TYPES.REROLL:
+                    message = `玩家${gameState.currentPlayer + 1}获得再抛一次机会！`;
+                    showMessage(message);
+                    // 这里可以设置状态让玩家再抛一次
+                    nextPlayer();
+                    break;
+                    
+                case CELL_TYPES.PAUSE:
+                    player.paused = 1;
+                    message = `玩家${gameState.currentPlayer + 1}被暂停一轮！`;
+                    showMessage(message);
+                    nextPlayer();
+                    break;
+                    
+                case CELL_TYPES.POSITIVE:
+                    message = `玩家${gameState.currentPlayer + 1}进行了环保行为！`;
+                    showMessage(message);
+                    nextPlayer();
+                    break;
+                    
+                case CELL_TYPES.NEGATIVE:
+                    message = `玩家${gameState.currentPlayer + 1}进行了不环保行为！`;
+                    showMessage(message);
+                    nextPlayer();
+                    break;
+                    
+                default:
+                    nextPlayer();
+                    break;
+            }
+        }
+        
+        // 切换到下一个玩家
+        function nextPlayer() {
+            gameState.currentPlayer = (gameState.currentPlayer + 1) % PLAYER_COUNT;
+            updatePlayerDisplay();
+            showMessage(`轮到玩家${gameState.currentPlayer + 1}的回合`);
+        }
+        
+        // 检查胜利条件
+        function checkWin() {
+            const player = gameState.players[gameState.currentPlayer];
+            if (player.position === BOARD_SIZE - 1) {
+                gameState.gameOver = true;
+                showMessage(`玩家${gameState.currentPlayer + 1}获胜！环保先锋！`);
+                createConfetti();
+                document.getElementById('roll-btn').disabled = true;
+                document.getElementById('restart-btn').disabled = false;
+            }
+        }
+        
+        // 显示消息
+        function showMessage(text) {
+            document.getElementById('message').textContent = text;
+        }
+        
+        // 创建彩带效果
+        function createConfetti() {
+            const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', 
+                           '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50'];
+            
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                confetti.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
+                document.body.appendChild(confetti);
+                
+                // 动画结束后移除元素
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+        
+        // 重新开始游戏
+        function restartGame() {
+            gameState = {
+                players: [
+                    { position: 0, paused: 0, color: 'player-1' },
+                    { position: 0, paused: 0, color: 'player-2' },
+                    { position: 0, paused: 0, color: 'player-3' }
+                ],
+                currentPlayer: 0,
+                gameOver: false,
+                diceValues: [0, 0, 0]
+            };
+            
+            updatePlayerPositions();
+            updatePlayerDisplay();
+            updateDiceDisplay();
+            showMessage("游戏重新开始！玩家1的回合");
+            document.getElementById('roll-btn').disabled = false;
+            document.getElementById('restart-btn').disabled = true;
+        }
+        
+        // 初始化游戏
+        window.onload = initGame;
+    </script>
+</body>
+</html>
